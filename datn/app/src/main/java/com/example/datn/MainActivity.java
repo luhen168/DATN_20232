@@ -26,7 +26,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private boolean isLogging = false;
-    private static final String CSV_HEADER = "utcTimeMillis,TimeNanos,LeapSecond,TimeUncertaintyNanos,FullBiasNanos,BiasNanos,BiasUncertaintyNanos,DriftNanosPerSecond,DriftUncertaintyNanosPerSecond,HardwareClockDiscontinuityCount,Svid,TimeOffsetNanos,State,ReceivedSvTimeNanos,ReceivedSvTimeUncertaintyNanos,Cn0DbHz,PseudorangeRateMetersPerSecond,PseudorangeRateUncertaintyMetersPerSecond,AccumulatedDeltaRangeState,AccumulatedDeltaRangeMeters,AccumulatedDeltaRangeUncertaintyMeters,CarrierFrequencyHz,CarrierCycles,CarrierPhase,CarrierPhaseUncertainty,MultipathIndicator,SnrInDb,ConstellationType,AgcDb,BasebandCn0DbHz,FullInterSignalBiasNanos,FullInterSignalBiasUncertaintyNanos,SatelliteInterSignalBiasNanos,SatelliteInterSignalBiasUncertaintyNanos,CodeType,ChipsetElapsedRealtimeNanos";
+    private static final String CSV_HEADER = "utcTimeMillis,TimeNanos,LeapSecond,TimeUncertaintyNanos,FullBiasNanos,BiasNanos,BiasUncertaintyNanos,DriftNanosPerSecond,DriftUncertaintyNanosPerSecond,HardwareClockDiscontinuityCount,Svid,TimeOffsetNanos,State,ReceivedSvTimeNanos,ReceivedSvTimeUncertaintyNanos,Cn0DbHz,PseudorangeRateMetersPerSecond,PseudorangeRateUncertaintyMetersPerSecond,AccumulatedDeltaRangeState,AccumulatedDeltaRangeMeters,AccumulatedDeltaRangeUncertaintyMeters,CarrierFrequencyHz,CarrierCycles,CarrierPhase,CarrierPhaseUncertainty,MultipathIndicator,SnrInDb,ConstellationType,AgcDb";
     private LocationManager locationManager;
     private FileWriter csvWriter;
     private String csvFilePath;
@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Not logging", Toast.LENGTH_SHORT).show();
         }
     }
+
     private final GnssMeasurementsEvent.Callback gnssMeasurementsEventListener = new GnssMeasurementsEvent.Callback() {
         @Override
         public void onGnssMeasurementsReceived(GnssMeasurementsEvent event) {
@@ -124,19 +125,19 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder builder = new StringBuilder();
         long TimeNanos = gnssClock.getTimeNanos();
         long FullBiasNanos = gnssClock.getFullBiasNanos();
-        double BiasNanos = gnssClock.getBiasNanos();
-        int LeapSecond = gnssClock.getLeapSecond();
+        double BiasNanos = gnssClock.hasBiasNanos() ? gnssClock.getBiasNanos() : 0;
+        int LeapSecond = gnssClock.hasLeapSecond() ? gnssClock.getLeapSecond() : 0;
         long utcTimeNanos = (long) (TimeNanos - (FullBiasNanos + BiasNanos) - LeapSecond*1000000000);
         long UtcTimeMillis = utcTimeNanos/1000000;
-        builder.append(UtcTimeMillis).append(",");
+        builder.append(System.currentTimeMillis()).append(",");
         builder.append(TimeNanos).append(",");
         builder.append(LeapSecond).append(",");
-        builder.append(gnssClock.getTimeUncertaintyNanos()).append(",");
+        builder.append(gnssClock.hasTimeUncertaintyNanos() ? gnssClock.getTimeUncertaintyNanos() : 0).append(",");
         builder.append(FullBiasNanos).append(",");
         builder.append(BiasNanos).append(",");
-        builder.append(gnssClock.getBiasUncertaintyNanos()).append(",");
-        builder.append(gnssClock.getDriftNanosPerSecond()).append(",");
-        builder.append(gnssClock.getDriftUncertaintyNanosPerSecond()).append(",");
+        builder.append(gnssClock.hasBiasUncertaintyNanos() ? gnssClock.getBiasUncertaintyNanos() : 0).append(",");
+        builder.append(gnssClock.hasDriftNanosPerSecond() ? gnssClock.getDriftNanosPerSecond() : 0).append(",");
+        builder.append(gnssClock.hasDriftUncertaintyNanosPerSecond() ? gnssClock.getDriftUncertaintyNanosPerSecond() : 0).append(",");
         builder.append(gnssClock.getHardwareClockDiscontinuityCount()).append(",");
         builder.append(measurement.getSvid()).append(",");
         builder.append(measurement.getTimeOffsetNanos()).append(",");
@@ -149,14 +150,14 @@ public class MainActivity extends AppCompatActivity {
         builder.append(measurement.getAccumulatedDeltaRangeState()).append(",");
         builder.append(measurement.getAccumulatedDeltaRangeMeters()).append(",");
         builder.append(measurement.getAccumulatedDeltaRangeUncertaintyMeters()).append(",");
-        builder.append(measurement.getCarrierFrequencyHz()).append(",");
-        builder.append(measurement.getCarrierCycles()).append(",");
-        builder.append(measurement.getCarrierPhase()).append(",");
-        builder.append(measurement.getCarrierPhaseUncertainty()).append(",");
+        builder.append(measurement.hasCarrierFrequencyHz() ? measurement.getCarrierFrequencyHz() : 0).append(",");
+        builder.append(measurement.hasCarrierCycles() ? measurement.getCarrierCycles() : 0).append(",");
+        builder.append(measurement.hasCarrierPhase() ? measurement.getCarrierPhase() : 0).append(",");
+        builder.append(measurement.hasCarrierPhaseUncertainty() ? measurement.getCarrierPhaseUncertainty() : 0).append(",");
         builder.append(measurement.getMultipathIndicator()).append(",");
-        builder.append(measurement.getSnrInDb()).append(",");
+        builder.append(measurement.hasSnrInDb() ? measurement.getSnrInDb() : 0).append(",");
         builder.append(measurement.getConstellationType()).append(",");
-        builder.append(measurement.getAutomaticGainControlLevelDb()).append(",");
+        builder.append(measurement.hasAutomaticGainControlLevelDb() ? measurement.getAutomaticGainControlLevelDb():0).append(",");
         builder.append(measurement.getBasebandCn0DbHz()).append(",");
         builder.append(measurement.getFullInterSignalBiasNanos()).append(",");
         builder.append(measurement.getFullInterSignalBiasUncertaintyNanos()).append(",");
