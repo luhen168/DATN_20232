@@ -123,21 +123,26 @@ public class MainActivity extends AppCompatActivity {
     }
     private String convertMeasurementToCsvLine(GnssMeasurement measurement, GnssClock gnssClock) {
         StringBuilder builder = new StringBuilder();
+        long utcTimeMillis = System.currentTimeMillis();
         long TimeNanos = gnssClock.getTimeNanos();
+        int LeapSecond = gnssClock.hasLeapSecond() ? gnssClock.getLeapSecond() : 0;
+        double TimeUncertaintyNanos = gnssClock.hasTimeUncertaintyNanos() ? gnssClock.getTimeUncertaintyNanos() : 0;
         long FullBiasNanos = gnssClock.getFullBiasNanos();
         double BiasNanos = gnssClock.hasBiasNanos() ? gnssClock.getBiasNanos() : 0;
-        int LeapSecond = gnssClock.hasLeapSecond() ? gnssClock.getLeapSecond() : 0;
-        long utcTimeNanos = (long) (TimeNanos - (FullBiasNanos + BiasNanos) - LeapSecond*1000000000);
-        builder.append(System.currentTimeMillis()).append(",");
+        double BiasUncertaintyNanos = gnssClock.hasBiasUncertaintyNanos() ? gnssClock.getBiasUncertaintyNanos() : 0;
+        double DriftNanosPerSecond = gnssClock.hasDriftNanosPerSecond() ? gnssClock.getDriftNanosPerSecond() : 0;
+        double DriftUncertaintyNanosPerSecond = gnssClock.hasDriftUncertaintyNanosPerSecond() ? gnssClock.getDriftUncertaintyNanosPerSecond() : 0;
+        double HardwareClockDiscontinuityCount = gnssClock.getHardwareClockDiscontinuityCount();
+        builder.append(utcTimeMillis).append(",");
         builder.append(TimeNanos).append(",");
         builder.append(LeapSecond).append(",");
-        builder.append(gnssClock.hasTimeUncertaintyNanos() ? gnssClock.getTimeUncertaintyNanos() : 0).append(",");
+        builder.append(TimeUncertaintyNanos).append(",");
         builder.append(FullBiasNanos).append(",");
         builder.append(BiasNanos).append(",");
-        builder.append(gnssClock.hasBiasUncertaintyNanos() ? gnssClock.getBiasUncertaintyNanos() : 0).append(",");
-        builder.append(gnssClock.hasDriftNanosPerSecond() ? gnssClock.getDriftNanosPerSecond() : 0).append(",");
-        builder.append(gnssClock.hasDriftUncertaintyNanosPerSecond() ? gnssClock.getDriftUncertaintyNanosPerSecond() : 0).append(",");
-        builder.append(gnssClock.getHardwareClockDiscontinuityCount()).append(",");
+        builder.append(BiasUncertaintyNanos).append(",");
+        builder.append(DriftNanosPerSecond).append(",");
+        builder.append(DriftUncertaintyNanosPerSecond).append(",");
+        builder.append(HardwareClockDiscontinuityCount).append(",");
         builder.append(measurement.getSvid()).append(",");
         builder.append(measurement.getTimeOffsetNanos()).append(",");
         builder.append(measurement.getState()).append(",");
