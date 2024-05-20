@@ -1,0 +1,70 @@
+<mxfile host="65bd71144e">
+    <diagram id="WnZQXVcFYX7Wy-MKrias" name="Kalman Filter">
+        <mxGraphModel dx="1024" dy="581" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="3" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="2" target="8" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="520" y="160" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="6" value="Đầu ra" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="3" vertex="1" connectable="0">
+                    <mxGeometry x="0.2753" y="-1" relative="1" as="geometry">
+                        <mxPoint x="-15" y="-9" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="4" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="7" target="2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="240" y="160" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="2" value="Kalman Filter" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="130" width="140" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="Đầu vào" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="230" y="170" width="70" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="Dữ liệu có nhiễu, độ chính xác thấp" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="160" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="Dữ liệu có nhiễu, độ chính xác thấp" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="160" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="12" target="15" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="523" y="351" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="10" value="Đầu ra" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="9">
+                    <mxGeometry x="0.2753" y="-1" relative="1" as="geometry">
+                        <mxPoint x="-15" y="-9" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="11" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" source="14" target="12" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="243" y="351" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="12" value="Kalman Filter" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="323" y="321" width="140" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="Đầu vào" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="233" y="361" width="70" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="Các giá trị output của WLS là x,y,z ecef&amp;nbsp; (chứa nhiều nhiễu, độ chính xác chưa cao)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="103" y="351" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="Giá trị x,y,z ecef đã được lọc&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="573" y="351" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="matrix_input = [x&lt;sub&gt;ecef&lt;/sub&gt;,y&lt;sub&gt;ecef&lt;/sub&gt;,z&lt;sub&gt;ecef&lt;/sub&gt;]" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="-2" y="433" width="185" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="matrix_output = [x'&lt;sub style=&quot;border-color: var(--border-color);&quot;&gt;ecef&lt;/sub&gt;,y'&lt;sub style=&quot;border-color: var(--border-color);&quot;&gt;ecef&lt;/sub&gt;,z'&lt;sub style=&quot;border-color: var(--border-color);&quot;&gt;ecef&lt;/sub&gt;]" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="569" y="428" width="199" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
