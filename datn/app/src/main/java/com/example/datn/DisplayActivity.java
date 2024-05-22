@@ -3,11 +3,13 @@ package com.example.datn;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.icu.text.SimpleDateFormat;
 import android.location.GnssClock;
 import android.location.GnssMeasurement;
 import android.location.GnssMeasurementsEvent;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,15 +24,22 @@ import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class DisplayActivity extends AppCompatActivity {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private LocationManager locationManager;
     private boolean isLogging = false;
-    private static final String TAG = "Error";
-
+    private static final String TAG = "GnssDataService";
+    private static final String CSV_HEADER = "utcTimeMillis,TimeNanos,LeapSecond,TimeUncertaintyNanos,FullBiasNanos,BiasNanos,BiasUncertaintyNanos,DriftNanosPerSecond,DriftUncertaintyNanosPerSecond,HardwareClockDiscontinuityCount,Svid,TimeOffsetNanos,State,ReceivedSvTimeNanos,ReceivedSvTimeUncertaintyNanos,Cn0DbHz,PseudorangeRateMetersPerSecond,PseudorangeRateUncertaintyMetersPerSecond,AccumulatedDeltaRangeState,AccumulatedDeltaRangeMeters,AccumulatedDeltaRangeUncertaintyMeters,CarrierFrequencyHz,CarrierCycles,CarrierPhase,CarrierPhaseUncertainty,MultipathIndicator,SnrInDb,ConstellationType,AgcDb,BasebandCn0DbHz,FullInterSignalBiasNanos,FullInterSignalBiasUncertaintyNanos,SatelliteInterSignalBiasNanos,SatelliteInterSignalBiasUncertaintyNanos,CodeType,ChipsetElapsedRealtimeNanos";
+    private FileWriter csvWriter;
+    private String csvFilePath;
     private List<String> gnssDataList = new ArrayList<>();
     TextView textView;
     Button startBtn, stopBtn;
@@ -79,6 +88,7 @@ public class DisplayActivity extends AppCompatActivity {
         if(isLogging) {
             locationManager.unregisterGnssMeasurementsCallback(gnssMeasurementsEventListener);
             isLogging = false;
+            closeCsvWriter();
             Toast.makeText(DisplayActivity.this, "GNSS Service stopped", Toast.LENGTH_SHORT).show();
         }
         else {
@@ -92,8 +102,45 @@ public class DisplayActivity extends AppCompatActivity {
             GnssClock gnssClock = event.getClock();
             Log.i("Location manager", "Co vao gnss measurement");
             executePythonCode(measurements, gnssClock);
+            saveToCsv(measurements, gnssClock);
+
         }
     };
+    private void saveToCsv(List<GnssMeasurement> measurements, GnssClock gnssClock) {
+        if (csvWriter == null) {
+            try {
+                String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm", Locale.getDefault()).format(new Date());
+                String fileName = "gnss_" + timeStamp + ".csv";
+                File csvFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), fileName);
+                csvFilePath = csvFile.getAbsolutePath();
+                csvWriter = new FileWriter(csvFile);
+                csvWriter.append(CSV_HEADER).append("\n");
+                Log.i(TAG, "CSV file created");
+            } catch (IOException e) {
+                Log.e(TAG, "Error creating CSV file", e);
+            }
+        }
+        try {
+            for (GnssMeasurement measurement : measurements) {
+                String line = convertMeasurementToCsvLine(measurement, gnssClock);
+                csvWriter.append(line);
+                csvWriter.append("\n");
+            }
+            csvWriter.flush();
+        } catch (IOException e) {
+            Log.e(TAG, "Error writing to CSV file", e);
+        }
+    }
+    private void closeCsvWriter() {
+        if (csvWriter != null) {
+            try {
+                csvWriter.close();
+                Toast.makeText(getApplicationContext(), "CSV file saved to: " + csvFilePath, Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                Log.e(TAG, "Error closing CSV writer", e);
+            }
+        }
+    }
     private void executePythonCode(List<GnssMeasurement> measurements, GnssClock gnssClock) {
         gnssDataList.clear();
         for (GnssMeasurement measurement : measurements) {
@@ -110,7 +157,6 @@ public class DisplayActivity extends AppCompatActivity {
         String joinedData = String.join(";", gnssDataList);
 
         PyObject result = pyModule.callAttr("process_data", joinedData);
-        Log.i("Execute python", "after");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
