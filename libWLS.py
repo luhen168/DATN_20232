@@ -183,7 +183,7 @@ class WLS:
             df_pr = self.satellite_selection(dataFrame, 'RawPseudorangeMeters')
 
             # Corrected pseudorange/pseudorange rate
-            pr = (df_pr['RawPseudorangeMeters']).to_numpy()
+            pr = (df_pr['RawPseudorangeMeters'] + df_pr['SvClockBiasMeters']).to_numpy()
             
             # Satellite position/velocity
             xsat_pr = df_pr[['SvPositionXEcefMeters', 'SvPositionYEcefMeters',  
