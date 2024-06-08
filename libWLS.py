@@ -175,4 +175,37 @@ class WLS:
             print("not enough satellite") #Error
         return x_wls#, v_wls, cov_x, cov_v
 
+    def WLS_onePosition_rawPseudo(self, dataFrame):
+            x0 = np.zeros(4)  # [x,y,z,tGPSL1]
+            x_wls = np.full(3, np.nan)  # For saving position
 
+            # Valid satellite selection
+            df_pr = self.satellite_selection(dataFrame, 'RawPseudorangeMeters')
+
+            # Corrected pseudorange/pseudorange rate
+            pr = (df_pr['RawPseudorangeMeters']).to_numpy()
+            
+            # Satellite position/velocity
+            xsat_pr = df_pr[['SvPositionXEcefMeters', 'SvPositionYEcefMeters',  
+                                'SvPositionZEcefMeters']].to_numpy()
+
+            # Weight matrix for peseudorange/pseudorange rate
+            Wx = np.diag(1 / df_pr['RawPseudorangeUncertaintyMeters'].to_numpy())
+
+            # Robust WLS
+            if len(df_pr) >= 4:
+                # Normal WLS
+                if np.all(x0 == 0):
+                    opt = scipy.optimize.least_squares(
+                        self.func_wls, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx))
+                    x0 = opt.x 
+                # Robust WLS for position estimation
+                opt = scipy.optimize.least_squares(
+                        self.func_wls, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx), loss='soft_l1')
+                if opt.status < 1 or opt.status == 2:
+                    print(f'position lsq status = {opt.status}\n') # Error convergence
+                else:
+                    x_wls[:] = opt.x[:3]
+            else:
+                print("not enough satellite") #Error
+            return x_wls
