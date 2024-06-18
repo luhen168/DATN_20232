@@ -1,5 +1,3 @@
-# 
-
 import numpy as np
 from scipy.spatial import distance
 
@@ -10,7 +8,6 @@ class KalmanFilter:
         self.G = np.eye(3)  # Control matrix
         self.H = np.eye(3)  # Measurement matrix
         self.I = np.eye(3)  # Identity matrix
-        self.residuals = []  # List to store residuals for covariance calculation
 
     def predict(self, x, u, P, Q):
         """
@@ -22,22 +19,16 @@ class KalmanFilter:
         P_pred = self.F @ P @ self.F.T + Q  # Covariance Extrapolation Equation 
         return x_pred, P_pred
 
-    def estimate(self, x_pred, P_pred, z):
+    def estimate(self, x_pred, P_pred, z, R):
         """
         Func: State update (estimation) step
-        Args: x_pred, P_pred, z (measurement)
+        Args: x_pred, P_pred, z (measurement), R 
         Returns: x (estimate), P (estimate)
         """
-        y = z.T - self.H @ x_pred  # Measurement residual 
-        self.residuals.append(y)
-        if len(self.residuals) > 1:
-            R = np.cov(np.array(self.residuals).T)
-        else:
-            R = np.eye(self.H.shape[0])  # Initial R if not enough residuals
-
-        K = P_pred @ self.H.T @ np.linalg.inv(self.H @ P_pred @ self.H.T + R)  # Kalman Gain
-        x = x_pred + K @ y  # State Update Equation (Estimate)
-        P = (self.I - K @ self.H) @ P_pred  # Covariance Update Equation 
+        y = z.T - self.H @ x_pred                                               # Measurement residal
+        K = P_pred @ self.H.T @ np.linalg.inv(self.H @ P_pred @ self.H.T + R)   # Kalman Gain
+        x = x_pred + K @ y                                                      # State Update Equation (Estimate)
+        P = (self.I - K @ self.H) @ P_pred                                      # Covariance Update Equation 
         return x, P
 
     def kalman_filter(self, zs, vs, cov_zs, cov_vs):
@@ -58,6 +49,7 @@ class KalmanFilter:
                 continue
 
             Q = cov_vs[i]
+            R = cov_zs[i]
 
             # Prediction step
             x, P = self.predict(x, u, P, Q)
@@ -67,7 +59,7 @@ class KalmanFilter:
 
             # Update step
             if d < self.sigma_mahalanobis:
-                x, P = self.estimate(x, P, z)
+                x, P = self.estimate(x, P, z, R)
             else:
                 P += 10**2 * Q
 
