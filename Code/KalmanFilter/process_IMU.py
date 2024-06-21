@@ -3,8 +3,8 @@ import pandas as pd
 # Đọc dữ liệu từ hai file CSV
 # imu_data = pd.read_csv(r'C:\Users\luan1\OneDrive\Desktop\DATN_20232\Code\GNSS-Positioning\data\2020-08-13-21-42-us-ca-mtv-sf-280\pixel5\device_imu.csv')
 # gnss_data = pd.read_csv(r'C:\Users\luan1\OneDrive\Desktop\DATN_20232\Code\GNSS-Positioning\data\2020-08-13-21-42-us-ca-mtv-sf-280\pixel5\device_gnss.csv')
-imu_data = pd.read_csv(r'C:\Users\luan1\OneDrive\Desktop\DATN_20232\Code\GNSS-Positioning\data\2020-06-25-00-34-us-ca-mtv-sb-101\pixel4xl\device_imu.csv')
-gnss_data = pd.read_csv(r'C:\Users\luan1\OneDrive\Desktop\DATN_20232\Code\GNSS-Positioning\data\2020-06-25-00-34-us-ca-mtv-sb-101\pixel4xl\device_gnss.csv')
+imu_data = pd.read_csv(r'D:\DATN_20232\Code\GNSS-Positioning\data\2020-06-25-00-34-us-ca-mtv-sb-101\pixel4xl\device_imu.csv')
+gnss_data = pd.read_csv(r'D:\DATN_20232\Code\GNSS-Positioning\data\2020-06-25-00-34-us-ca-mtv-sb-101\pixel4xl\device_gnss.csv')
 
 # Khởi tạo danh sách để lưu kết quả trung bình
 result = []
