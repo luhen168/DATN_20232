@@ -1,0 +1,36 @@
+[Normal] FundamentalsofKalmanFiltering_Presentation
+
+Tài liệu được tải lên là một bài thuyết trình có tiêu đề "Những nguyên lý cơ bản của Lọc Kalman và Ước lượng trong Kỹ thuật Hàng không vũ trụ" của Christopher D’Souza từ Trung tâm Vũ trụ Johnson của NASA, ngày 20 tháng 3 năm 2013. Bài thuyết trình là một hướng dẫn toàn diện về các kỹ thuật lọc Kalman và ước lượng, chủ yếu được sử dụng trong kỹ thuật hàng không vũ trụ.
+
+### Các phần chính và chủ đề được đề cập:
+
+1. **Giới thiệu và Bối cảnh**:
+   - Tầm quan trọng và ứng dụng của ước lượng trong nhiều kịch bản khác nhau, bao gồm cả cuộc sống hàng ngày và các nhiệm vụ kỹ thuật.
+   - Lược sử về ước lượng, bắt đầu từ Phương pháp Bình phương Tối thiểu của Gauss đến các đóng góp hiện đại của Norbert Weiner và Claude Shannon.
+
+2. **Phương pháp Bình phương Tối thiểu**:
+   - Giải thích về các vấn đề Bình phương Tối thiểu và Bình phương Tối thiểu có trọng số (WLS).
+   - Phép dẫn xuất chi tiết và các ví dụ minh họa cách tìm ra ước lượng tốt nhất của trạng thái cho trước các phép đo nhiễu.
+
+3. **Lọc Kalman**:
+   - Giới thiệu về lọc Kalman, bối cảnh lịch sử và tầm quan trọng của nó trong lý thuyết ước lượng hiện đại.
+   - Phép dẫn xuất toán học của lọc Kalman, bao gồm các pha truyền và cập nhật, và cách chúng được sử dụng để ước lượng tối ưu trạng thái của hệ thống.
+
+4. **Các xem xét và chủ đề nâng cao về triển khai**:
+   - Thảo luận về Bộ lọc Kalman Mở rộng (EKF) để xử lý các hệ thống phi tuyến.
+   - Các xem xét thực tế khi triển khai bộ lọc Kalman, chẳng hạn như xử lý các phép đo không Gauss, độ trễ của phép đo và điều chỉnh bộ lọc.
+   - Các chủ đề nâng cao bao gồm Lọc Kalman-Bucy, Bộ lọc Kalman Schmidt, Lọc Kalman mịn và các bộ lọc phi tuyến khác nhau.
+
+5. **Quá trình ngẫu nhiên**:
+   - Giải thích chi tiết về các quá trình ngẫu nhiên, bao gồm các hệ thống tuyến tính và phi tuyến, giá trị trung bình và phương sai của các biến ngẫu nhiên, và phân phối Gauss.
+   - Ứng dụng của các khái niệm này trong ngữ cảnh của lọc Kalman.
+
+6. **Ví dụ và ứng dụng thực tế**:
+   - Các ví dụ minh họa ứng dụng của lọc Kalman trong các kịch bản thực tế, chẳng hạn như theo dõi máy bay và hệ thống lò xo-khối giảm chấn.
+   - Nhấn mạnh vào các xem xét thực tế và tầm quan trọng của sự chuẩn bị kỹ lưỡng và điều chỉnh trong thiết kế bộ lọc.
+
+7. **Kết luận và Đọc thêm**:
+   - Tóm tắt các điểm chính và kết luận rút ra từ bài thuyết trình.
+   - Đề xuất các tài liệu đọc thêm và khám phá các chủ đề nâng cao trong lọc Kalman và ước lượng.
+
+Tài liệu cung cấp một cái nhìn tổng quan kỹ lưỡng về cả nền tảng lý thuyết và chi tiết triển khai thực tế của lọc Kalman, làm cho nó trở thành một tài nguyên quý giá cho bất kỳ ai làm việc trong các lĩnh vực đòi hỏi ước lượng trạng thái từ dữ liệu cảm biến nhiễu, đặc biệt là trong kỹ thuật hàng không vũ trụ.
