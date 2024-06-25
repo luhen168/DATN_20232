@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+import pandas as pd
 import utm
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -25,7 +26,7 @@ class KF_SensorFusion:
     def load_data(self):
         self.gps_data = self.load_data_from_csv(self.gps_csv_file)
         self.imu_data = self.load_data_from_csv(self.imu_csv_file)
-
+    
     def gps_to_utm(self):
         initial_easting = None
         initial_northing = None
@@ -501,10 +502,36 @@ class KF_SensorFusion:
         plt.tight_layout()
         plt.show()
 
+def save_output2csv(estimated_positions, output_file):
+    """
+    Lưu dữ liệu đầu ra từ bộ lọc Kalman vào tệp CSV.
+
+    Parameters:
+    - timestamps: danh sách chứa các thời gian tương ứng với các trạng thái ước lượng.
+    - estimated_positions: numpy array chứa các trạng thái ước lượng từ bộ lọc Kalman.
+    - filename: tên tệp CSV để lưu dữ liệu.
+    """
+    # Chuyển estimated_positions thành numpy array nếu nó chưa phải là numpy array
+    if isinstance(estimated_positions, list):
+        estimated_positions = np.array(estimated_positions)
+    
+    # Tạo DataFrame từ dữ liệu đầu ra
+    df = pd.DataFrame({
+        # 'time': timestamps,
+        'utm_east': estimated_positions[:, 0],
+        'utm_north': estimated_positions[:, 1]
+    })
+    
+    # Lưu DataFrame vào tệp CSV
+    df.to_csv(output_file, index=False)
+    print(f"Kalman filter output saved to {output_file}")
+
+
 if __name__ == "__main__":
     # Define file paths for GPS and IMU data
     gps_csv_file = 'gps_data.csv'
-    imu_csv_file = 'imu_data.csv'
+    imu_csv_file = r'C:\Users\luan1\Downloads\imu_data.csv'
+    output_csv_file = 'gps_data_kalman_filtered.csv'  # Define the output file for the Kalman filter results
 
     # Create an instance of KF_SensorFusion
     sensor_fusion = KF_SensorFusion(gps_csv_file, imu_csv_file)
@@ -524,23 +551,26 @@ if __name__ == "__main__":
     # Compute stationary orientation of the IMU
     avg_roll, avg_pitch, avg_yaw = sensor_fusion.compute_stationary_orientation(first_valid_index)
 
-    # Plot raw GPS data
-    sensor_fusion.plot_gps_data()
+    # # Plot raw GPS data
+    # sensor_fusion.plot_gps_data()
 
     # Combine GPS and IMU data and sort by timestamp
     sensor_fusion.combine_sensor_data()
 
     # Run Kalman filter for sensor fusion
-    sf_KF_state = sensor_fusion.run_kalman_filter()
+    sf_KF_state= sensor_fusion.run_kalman_filter()
 
-    # Plot the estimated states from the Kalman filter against GPS data
-    sensor_fusion.plot_kf_states(sf_KF_state)
+    # # Plot the estimated states from the Kalman filter against GPS data
+    # sensor_fusion.plot_kf_states(sf_KF_state)
 
     # Run dead reckoning for IMU data
     deadreckoned_IMU_estimates = sensor_fusion.run_dead_reckoning_for_IMU()
 
-    # Plot dead-reckoned IMU estimates against raw GPS data
-    sensor_fusion.plot_deadreckoned_imu_with_gps(deadreckoned_IMU_estimates)
+    # # Plot dead-reckoned IMU estimates against raw GPS data
+    # sensor_fusion.plot_deadreckoned_imu_with_gps(deadreckoned_IMU_estimates)
     
-    # Plot theta comparisons
-    sensor_fusion.plot_theta_comparisons(sf_KF_state, deadreckoned_IMU_estimates)
+    # # Plot theta comparisons
+    # sensor_fusion.plot_theta_comparisons(sf_KF_state, deadreckoned_IMU_estimates)
+
+    # Save the Kalman filter output to a CSV file
+    save_output2csv(sf_KF_state, output_csv_file)

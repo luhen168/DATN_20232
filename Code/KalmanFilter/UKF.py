@@ -83,7 +83,7 @@ def compute_sigma_points(state, P):
     return sigma_points, Wm, Wc
 
 # Đọc dữ liệu từ file CSV
-imu_data = pd.read_csv(r'D:\DATN_20232\Code\KalmanFilter\imu_convert_ecef.csv')
+imu_data = pd.read_csv(r'D:\DATN_20232\Code\KalmanFilter\imu_ecef.csv')
 gps_data = pd.read_csv(r'D:\DATN_20232\Code\GNSS-Positioning\position_velocity_cov_ecef.csv')
 
 # Kiểm tra kích thước của dữ liệu
@@ -113,8 +113,8 @@ results = []
 # Vòng lặp qua các dữ liệu
 for idx in range(min_length):
     # Lấy dữ liệu IMU và GPS tại thời điểm hiện tại
-    imu_accel = imu_data.iloc[idx][['ax', 'ay', 'az']].values
-    imu_gyro = imu_data.iloc[idx][['gx', 'gy', 'gz']].values
+    imu_accel = imu_data.iloc[idx][['accel_ecef_x', 'accel_ecef_y', 'accel_ecef_z']].values
+    imu_gyro = imu_data.iloc[idx][['gyro_ecef_x', 'gyro_ecef_y', 'gyro_ecef_z']].values
     gps_position = gps_data.iloc[idx][['x', 'y', 'z']].values
     gps_velocity = gps_data.iloc[idx][['v_x', 'v_y', 'v_z']].values
     measurement = np.hstack((gps_position, gps_velocity))
@@ -160,5 +160,5 @@ position_array = [(time, lat, lon, alt) for time, (lat, lon, alt) in zip(utcTime
 
 # Chuyển đổi mảng vị trí thành DataFrame và xuất ra file CSV
 df = pd.DataFrame(position_array, columns=["utcTimeMillis", "Latitude", "Longitude", "Altitude"])
-df.to_csv('gnss_latlong.csv', index=False)
-print('Data successfully exported to gnss_latlong.csv')
+df.to_csv('ukf_gnss_latlong.csv', index=False)
+print('Data successfully exported to ukf_gnss_latlong.csv')
