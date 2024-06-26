@@ -31,20 +31,21 @@ class KalmanFilter:
         P = (self.I - K @ self.H) @ P_pred                                      # Covariance Update Equation 
         return x, P
 
-    def kalman_filter(self, zs, vs, cov_zs, cov_vs):
+    def kalman_filter(self, x_wls, v_wls, cov_zs, cov_vs):
         """
         Kalman filter process
         """
         # Initial variable
-        n, dim_x = zs.shape
-        x = zs[0, :3].T
+        vs = np.vstack([np.zeros([1, 3]), (v_wls[:-1] + v_wls[1:])/2])
+        n, dim_x = x_wls.shape
+        x = x_wls[0, :3].T
         P = 5**2 * np.eye(3)
         x_kf = np.zeros([n, dim_x])
         P_kf = np.zeros([n, dim_x, dim_x])
         x_kf[0] = x.T
         P_kf[0] = P
 
-        for i, (u, z) in enumerate(zip(vs, zs)):
+        for i, (u, z) in enumerate(zip(vs, x_wls)):
             if i == 0:
                 continue
 
