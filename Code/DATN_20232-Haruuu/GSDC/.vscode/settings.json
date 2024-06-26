@@ -1,7 +1,0 @@
-{
-    "python.analysis.extraPaths": [
-        "./output",
-        "./gnss-analysis",
-        "./gnss_analysis"
-    ]
-}
