@@ -3,6 +3,7 @@ from time import time
 import numpy as np
 import pandas as pd
 from libWLS import WLS
+from Outlier_Detection_final01 import Outlier
 
 def main():
     # Load your GNSS data into a DataFrame
@@ -23,7 +24,7 @@ def main():
     wls = WLS()
 
     # Sử dụng phương thức WLS_onePosition để tính toán vị trí
-    estimated_pos = wls.WLS_onePosition(gnss_epoch)
+    estimated_pos = wls.WLS_onePosition_origin(gnss_epoch)
     
     # # In ra kết quả vị trí đã tính toán
     # print('here')

@@ -7,7 +7,8 @@ class WLS:
         self.RE_WGS84 = 6_378_137   # earth semimajor axis (WGS84) (m)
         self.OMGE = 7.2921151467E-5  # earth angular velocity (IS-GPS) (rad/s)
     
-    def satellite_selection(self, df, column):
+
+    def satellite_selection(self, dataFrame, column):
         """
         Args:
             df : DataFrame each epoch
@@ -15,13 +16,16 @@ class WLS:
         Returns:
             df: DataFrame with eliminated satellite signals
         """
-        idx = df[column].notnull()
-        idx &= df['CarrierErrorHz'] < 2.0e6  # carrier frequency error (Hz)
-        idx &= df['SvElevationDegrees'] > 10.0  # elevation angle (deg)
-        idx &= df['Cn0DbHz'] > 18.0  # C/N0 (dB-Hz)
-        idx &= df['MultipathIndicator'] == 0 # Multipath flag
-        return df[idx]
+        idx = dataFrame[column].notnull()
+        if 'CarrierErrorHz' in dataFrame.columns:
+            idx &= dataFrame['CarrierErrorHz'] < 2.0e6  # carrier frequency error (Hz)
+        if 'SvElevationDegrees' in dataFrame.columns:
+            idx &= dataFrame['SvElevationDegrees'] > 10.0  # elevation angle (deg)
+        idx &= dataFrame['Cn0DbHz'] > 18.0  # C/N0 (dB-Hz)
+        idx &= dataFrame['MultipathIndicator'] == 0 # Multipath flag
+        return dataFrame[idx]
     
+
     def los_vector(self, xusr, xsat):
         """
         Args:
@@ -36,9 +40,16 @@ class WLS:
         u /= rng
         return u, rng.reshape(-1)
     
-    def func_wls(self, x_rcv, x_sat, pr_obs, w):
+
+    def pr_residuals(self, x_rcv, x_sat, pr_obs, W):
         """
-        Compute pseudorange residuals
+        Args:
+            x : current position in ECEF (m)
+            xsat : satellite position in ECEF (m)
+            pr : pseudorange (m)
+            W : weight matrix
+        Returns:
+            residuals*W : pseudorange residuals
         """
         b = x_rcv[3]
         r = pr_obs - b  # distance to each satellite [m]
@@ -50,8 +61,9 @@ class WLS:
         x[:, 0] =  cosO * x_sat[:, 0] + sinO * x_sat[:, 1]
         x[:, 1] = -sinO * x_sat[:, 0] + cosO * x_sat[:, 1]
         x[:, 2] = x_sat[:, 2]
-        return w @ (np.sqrt(np.sum((x - x_rcv[:3])**2, axis=1)) - r)
+        return W @ (np.sqrt(np.sum((x - x_rcv[:3])**2, axis=1)) - r)
     
+
     def jac_pr_residuals(self, x, xsat, pr, W):
         """
         Args:
@@ -66,7 +78,7 @@ class WLS:
         J = np.hstack([-u, np.ones([len(pr), 1])])  # J = [-ux -uy -uz 1]
         return W @ J
     
-    # Compute pseudorange rate residuals
+
     def prr_residuals(self, v, vsat, prr, x, xsat, W):
         """
         Args:
@@ -80,13 +92,28 @@ class WLS:
             residuals*W : pseudorange rate residuals
         """
         u, rng = self.los_vector(x[:3], xsat)
+        tau = rng / self.CLIGHT
+        cosO = np.cos(self.OMGE * tau)
+        sinO = np.sin(self.OMGE * tau)
+
+        v_sat = np.empty_like(vsat)
+        v_sat[:, 0] =  cosO * vsat[:, 0] + sinO * vsat[:, 1]
+        v_sat[:, 1] = -sinO * vsat[:, 0] + cosO * vsat[:, 1]
+        v_sat[:, 2] = vsat[:, 2]
+
+        x_sat = np.empty_like(xsat)
+        x_sat[:, 0] =  cosO * xsat[:, 0] + sinO * xsat[:, 1]
+        x_sat[:, 1] = -sinO * xsat[:, 0] + cosO * xsat[:, 1]
+        x_sat[:, 2] = xsat[:, 2]
+
         rate = np.sum((vsat-v[:3])*u, axis=1) \
             + self.OMGE / self.CLIGHT * (vsat[:, 1] * x[0] + xsat[:, 1] * v[0]
-                            - vsat[:, 0] * x[1] - xsat[:, 0] * v[1])
+                                         - vsat[:, 0] * x[1] - xsat[:, 0] * v[1])
 
         residuals = rate - (prr - v[3])
 
         return residuals @ W
+    
     def jac_prr_residuals(self, v, vsat, prr, x, xsat, W):
         """
         Args:
@@ -103,7 +130,7 @@ class WLS:
         J = np.hstack([-u, np.ones([len(prr), 1])])
         return W @ J
     
-    def WLS_onePosition(self, dataFrame):
+    def WLS_onePosition_origin(self, dataFrame):
         x0 = np.zeros(4)  # [x,y,z,tGPSL1]
         v0 = np.zeros(4)  # [vx,vy,vz,dtGPSL1]
         x_wls = np.full(3, np.nan)  # For saving position
@@ -112,6 +139,10 @@ class WLS:
         cov_v = np.full([3, 3], np.nan) # For saving velocity covariance
 
         # Valid satellite selection
+        if 'pr_smooth' in dataFrame.columns:
+            df_pr = self.satellite_selection(dataFrame, 'pr_smooth')
+        else:
+            df_pr = self.satellite_selection(dataFrame, 'RawPseudorangeMeters')
         df_pr = self.satellite_selection(dataFrame, 'RawPseudorangeMeters')
         df_prr = self.satellite_selection(dataFrame, 'PseudorangeRateMetersPerSecond')
 
@@ -138,11 +169,11 @@ class WLS:
             # Normal WLS
             if np.all(x0 == 0):
                 opt = scipy.optimize.least_squares(
-                    self.func_wls, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx))
+                    self.pr_residuals, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx))
                 x0 = opt.x 
             # Robust WLS for position estimation
             opt = scipy.optimize.least_squares(
-                    self.func_wls, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx), loss='soft_l1')
+                    self.pr_residuals, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx), loss='soft_l1')
             if opt.status < 1 or opt.status == 2:
                 print(f'position lsq status = {opt.status}\n') # Error convergence
             else:
@@ -173,14 +204,19 @@ class WLS:
                 v0 = opt.x
         else:
             print("not enough satellite") #Error
-        return x_wls#, v_wls, cov_x, cov_v
+        return x_wls, v_wls, cov_x, cov_v
 
+
+    #   Hàm này gọi để Minh Đức tính trễ do khí quyển gây ra
     def WLS_onePosition_rawPseudo(self, dataFrame):
             x0 = np.zeros(4)  # [x,y,z,tGPSL1]
             x_wls = np.full(3, np.nan)  # For saving position
 
             # Valid satellite selection
-            df_pr = self.satellite_selection(dataFrame, 'RawPseudorangeMeters')
+            if 'pr_smooth' in dataFrame.columns:
+                df_pr = self.satellite_selection(dataFrame, 'pr_smooth')
+            else:
+                df_pr = self.satellite_selection(dataFrame, 'RawPseudorangeMeters')
 
             # Corrected pseudorange/pseudorange rate
             pr = (df_pr['RawPseudorangeMeters'] + df_pr['SvClockBiasMeters']).to_numpy()
@@ -197,11 +233,11 @@ class WLS:
                 # Normal WLS
                 if np.all(x0 == 0):
                     opt = scipy.optimize.least_squares(
-                        self.func_wls, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx))
+                        self.pr_residuals, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx))
                     x0 = opt.x 
                 # Robust WLS for position estimation
                 opt = scipy.optimize.least_squares(
-                        self.func_wls, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx), loss='soft_l1')
+                        self.pr_residuals, x0, self.jac_pr_residuals, args=(xsat_pr, pr, Wx), loss='soft_l1')
                 if opt.status < 1 or opt.status == 2:
                     print(f'position lsq status = {opt.status}\n') # Error convergence
                 else:
