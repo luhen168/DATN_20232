@@ -202,8 +202,8 @@ class EphemerisManager():
         return alpha, beta
 
 
-# if __name__ == '__main__':
-#     repo = EphemerisManager()
-#     target_time = datetime(2021, 1, 9, 12, 0, 0, tzinfo=timezone.utc)
-#     data = repo.get_ephemeris(target_time, ['G01', 'G03'])
-#     print(data)
+if __name__ == '__main__':
+    repo = EphemerisManager()
+    target_time = datetime(2020, 6, 25, 0, 0, 34, tzinfo=timezone.utc)
+    data = repo.get_ephemeris(target_time, ['G01', 'G03'])
+    print(data['t_oe'])

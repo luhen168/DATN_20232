@@ -1,6 +1,24 @@
 import numpy as np
-
+import math
 # Constants for the Klobuchar model
+
+
+def geocentric_to_geodetic(geocentric_latitude):
+    # Constants for WGS84
+    a = 6378137.0  # Semi-major axis in meters
+    b = 6356752.3142  # Semi-minor axis in meters
+    e2 = 1 - (b ** 2 / a ** 2)  # Square of eccentricity
+
+    geocentric_latitude_rad = math.radians(geocentric_latitude)
+    
+    # Use iterative approach to convert geocentric latitude to geodetic latitude
+    geodetic_latitude_rad = geocentric_latitude_rad
+    for _ in range(5):  # Iterate to converge to the correct value
+        geodetic_latitude_rad = math.atan(
+            (1 - e2) * math.tan(geocentric_latitude_rad)
+        )
+    
+    return math.degrees(geodetic_latitude_rad)
 
 
 class Ionosphere():
@@ -21,7 +39,7 @@ class Ionosphere():
         """
         # Convert latitude and longitude to semi-circle units
         GPS_time = _GPS_time * 1e-3
-        latitude = np.deg2rad(latitude)
+        latitude = geocentric_to_geodetic(latitude)
         longitude = np.deg2rad(longitude)
         azimuth = np.deg2rad(azimuth)
         elevation = np.deg2rad(elevation)

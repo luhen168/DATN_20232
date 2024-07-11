@@ -20,7 +20,7 @@ class ElevationAzimuthAngle:
         
         return X, Y, Z
 
-    def ecef_to_topocentric(self,observer_ecef, vehicle_ecef, lat, lon):
+    def ecef_to_enu(self,observer_ecef, vehicle_ecef, lat, lon):
         # Translation vector from observer to vehicle
         dX = vehicle_ecef['SvPositionXEcefMeters'] - observer_ecef[0]
         dY = vehicle_ecef['SvPositionYEcefMeters'] - observer_ecef[1]
@@ -64,7 +64,7 @@ class ElevationAzimuthAngle:
         longitude = np.deg2rad(UserPosition_lla[1])
         altitude = UserPosition_lla[2]
         observer_ecef = self.geodetic_to_ecef(latitude, longitude, altitude)
-        enu = self.ecef_to_topocentric(observer_ecef, SvPosition_ecef, latitude, longitude)
+        enu = self.ecef_to_enu(observer_ecef, SvPosition_ecef, latitude, longitude)
         azimuth = self.calculate_azimuth(enu)
         elevation = self.calculate_elevation(enu)
         
